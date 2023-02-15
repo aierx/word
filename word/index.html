@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.js"></script>
+    <title>word</title>
+</head>
+
+<body>
+    <div class="main">
+        <input id="keyword" style="height: 25px; width: 200px;">
+        <label class="row-label" style="width: 15pt">单词本:</label>
+        <select id="taskMan"></select>
+        <input type="radio" id="prefix" checked>前缀</input>
+        <input type="radio" id="suffix" checked>后缀</input>
+        <button id="clear" onclick="clean()">清除</button>
+        <label id="queryCount">0</label>
+        <label>/</label>
+        <label id="count"></label>
+        <label>分页大小:</label>
+        <input id="pageSize" value="15" style="width: 36px;" />
+        <div style="padding-top: 8px;">
+            <input type="file" id="uf">
+            <label>字典名称:</label>
+            <input id="dicName">
+            <button id="upload">上传字典</button>
+        </div>
+        <div style="padding-top: 8px;">
+            <table id="customers">
+                <tr>
+                    <th>单词</th>
+                    <th>音标</th>
+                    <th>中文</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+<script>
+    var prefix = true;
+    var suffix = true;
+
+    var queryCategogy;
+    $('#suffix').click(function () {
+        if (prefix) {
+            $(this).prop('checked', false);
+            prefix = false
+        } else {
+            $(this).prop('checked', true);
+            prefix = true
+        }
+    });
+    $('#prefix').click(function () {
+        if (suffix) {
+            $(this).prop('checked', false);
+            suffix = false
+        } else {
+            $(this).prop('checked', true);
+            suffix = true
+        }
+    });
+
+    function getWordBookList() {
+        $.ajax({
+            type: "GET",
+            url: "http://aierx.icu:8080/name",
+            success: function (data) {
+                data.forEach(element => {
+                    if (queryCategogy == undefined) {
+                        queryCategogy = element.name
+                        $.get("http://aierx.icu:8080/count?category=" + queryCategogy, function (e) {
+                            $("#count").text(e.t - 1)
+                        })
+                    }
+                    $("#taskMan").append("<option value=" + element.id + ">" + element.name + "</option>")
+                });
+            }
+        });
+    }
+    getWordBookList()
+
+    $("#taskMan").change(function () {
+        queryCategogy = $("#taskMan option:selected").text();
+        $.get("http://aierx.icu:8080/count?category=" + queryCategogy, function (e) {
+            $("#count").text(e.t - 1)
+        })
+    })
+
+    function clean() {
+        $("#customers").children().remove()
+        let header = "<tr><th>单词</th><th>音标</th><th>中文</th></tr>"
+        $("#customers").append(header)
+    }
+    // 渲染单词表
+    $("#keyword").bind("input propertychange", function (e) {
+        let keyword = $(this).val()
+        if (prefix) {
+            keyword = "*" + keyword
+        }
+        if (suffix) {
+            keyword = keyword + "*"
+        }
+        $.get("http://aierx.icu:8080/query?keyword=" + keyword + "&category="
+            + queryCategogy + "&pageSize=" + $("#pageSize").val(), function (data, status) {
+                $("#customers").children().remove()
+                let header = "<tr><th>单词</th><th>音标</th><th>中文</th></tr>"
+                $("#customers").append(header)
+                let res = data.data
+                res.forEach(e => {
+                    var text = "<tr><td>" + e.word + "</td><td>"
+                        + e.accent + "</td><td>"
+                        + e.meanCN + "</td></tr>"
+                    $("#customers").append(text)
+                })
+                $("#queryCount").text(data.totalSize)
+            })
+    })
+
+    // 上传单词文件
+    $("#upload").click(function () {
+        let name = $("#dicName").val()
+        if (name == "") {
+            alert("字典名称不能为空")
+            return
+        }
+        var file = $("#uf").get(0).files[0]
+        if (file == undefined) {
+            alert("上传文件不能为空")
+            return
+        }
+        var form = new FormData();
+        form.append("file", file);
+        form.append("name", name)
+
+        $.ajax({
+            "url": "http://aierx.icu:8080/upload",
+            "method": "POST",
+            "timeout": 0,
+            "processData": false,
+            "mimeType": "multipart/form-data",
+            "contentType": false,
+            "data": form
+        }).done(function (response) {
+            let data = JSON.parse(response)
+            console.log(response)
+            console.log(data.code)
+            if (data.code == 500) {
+                alert(data.msg)
+            }
+        });
+    })
+
+
+</script>
+<style>
+    @media (min-width:1180px) {
+        .main {
+            width: 80%;
+            margin: auto
+        }
+    }
+    #customers {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    #customers td,
+    #customers th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #customers tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    #customers tr:hover {
+        background-color: #ddd;
+    }
+
+    #customers th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+
+</html>

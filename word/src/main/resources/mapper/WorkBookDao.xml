@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="icu.aierx.word.dao.WorkBookDao">
+    <insert id="save">
+        insert into WordBook  (`name`,lastupdatedate,crateddate) VALUES(#{nameVO.name},NOW(),NOW())
+    </insert>
+    <select id="findAll" resultType="icu.aierx.word.model.NameVO">
+        select * from WordBook order by seq;
+    </select>
+
+    <select id="findByName" resultType="icu.aierx.word.model.NameVO">
+        select * from WordBook where name = #{name};
+    </select>
+    <select id="queryMaxId" resultType="java.lang.Integer">
+        select id from WordBook order by id desc limit 1;
+    </select>
+
+</mapper>

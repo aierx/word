@@ -2,10 +2,11 @@ package icu.aierx.word.dao;
 
 import icu.aierx.word.model.NameVO;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
-import javax.naming.Name;
 import java.util.List;
 
+@Repository
 public interface WorkBookDao {
 
     List<NameVO> findAll();

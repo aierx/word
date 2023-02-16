@@ -6,7 +6,7 @@ import icu.aierx.word.model.NameVO;
 import icu.aierx.word.model.PageVO;
 import icu.aierx.word.model.ResultVO;
 import icu.aierx.word.util.CommonUtil;
-import icu.aierx.word.dao.WordRepository;
+import icu.aierx.word.repository.WordRepository;
 import icu.aierx.word.model.WordVO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController

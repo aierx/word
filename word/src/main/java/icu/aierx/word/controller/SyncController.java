@@ -1,6 +1,6 @@
 package icu.aierx.word.controller;
 
-import icu.aierx.word.dao.WordRepository;
+import icu.aierx.word.repository.WordRepository;
 import icu.aierx.word.dao.WorkBookDao;
 import icu.aierx.word.model.NameVO;
 import icu.aierx.word.model.ResultVO;
